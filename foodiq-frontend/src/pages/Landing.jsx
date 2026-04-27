@@ -47,9 +47,23 @@ const Landing = () => {
       
       {/* Hero Section */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-10 py-12 flex flex-col items-center">
-        <div className="flex flex-col md:flex-row items-center justify-between w-full mb-20 bg-white rounded-[2rem] shadow-sm p-12 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row items-center justify-between w-full mb-20 bg-white rounded-[2rem] shadow-sm p-12 relative overflow-hidden min-h-[550px]">
+          {/* Background Video */}
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover z-0"
+          >
+            <source src="/11610-231571879_medium.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
           
-          <div className="md:w-1/2 pr-10 z-10">
+          {/* Overlay for better readability */}
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[1]"></div>
+          
+          <div className="md:w-1/2 pr-10 z-10 relative">
             <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
               Welcome to FoodIQ - Your Personalized Nutrition Intelligence.
             </h1>
@@ -78,7 +92,7 @@ const Landing = () => {
           </div>
 
           {/* Decorative background circle */}
-          <div className="absolute right-[-10%] top-[-20%] w-[600px] h-[600px] bg-emerald-50 rounded-full blur-3xl opacity-50 z-0"></div>
+          <div className="absolute right-[-10%] top-[-20%] w-[600px] h-[600px] bg-emerald-50 rounded-full blur-3xl opacity-50 z-[2]"></div>
         </div>
         
         {/* How It Works */}
