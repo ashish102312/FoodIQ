@@ -1,10 +1,22 @@
 package com.foodiq.repository;
+
 import com.foodiq.model.Intake;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.time.LocalDate;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IntakeRepository extends JpaRepository<Intake, Long> {
-    List<Intake> findByUserIdAndDate(Long userId, LocalDate date);
-    List<Intake> findByUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
+
+    List<Intake> findByUserId(Long userId);
+
+    @Query("SELECT i FROM Intake i WHERE i.user.id = :userId " +
+           "AND i.consumedAt >= :startOfDay AND i.consumedAt < :endOfDay")
+    List<Intake> findDailyIntakes(
+            @Param("userId") Long userId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay
+    );
 }

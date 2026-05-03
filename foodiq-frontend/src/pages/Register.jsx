@@ -11,7 +11,7 @@ const Register = () => {
     try {
       const payload = {
         ...formData,
-        allergies: formData.allergies.split(',').map(s => s.trim())
+        allergies: formData.allergies ? formData.allergies.split(',').map(s => s.trim()).filter(Boolean) : []
       };
       await axios.post('http://localhost:8080/api/auth/register', payload);
       alert('Registration successful! Please login.');

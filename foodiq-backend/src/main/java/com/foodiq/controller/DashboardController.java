@@ -4,13 +4,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
+import org.springframework.cache.annotation.Cacheable;
 
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
     @GetMapping
-    public ResponseEntity<?> getDashboard() {
+    @Cacheable(value = "dashboard", key = "#userId")
+    public ResponseEntity<?> getDashboard(@RequestParam Long userId) {
         // Mock dashboard data
         Map<String, Object> data = new HashMap<>();
         data.put("dailyIntake", 1500);

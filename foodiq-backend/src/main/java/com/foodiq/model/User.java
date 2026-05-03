@@ -1,42 +1,56 @@
 package com.foodiq.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
+    @NotBlank(message = "Name is required")
     private String name;
-    
-    @Column(unique = true)
+
+    @Email(message = "Valid email is required")
+    @Column(unique = true, nullable = false)
     private String email;
-    
+
+    @NotBlank(message = "Password is required")
     private String password;
-    
+
     private Double goalProtein;
-    
-    private String preference; // veg/non-veg
-    
-    @ElementCollection
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preference")
+    private FoodType preference;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    @Builder.Default
+    private Role role = Role.USER;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_allergies", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "allergy")
     private List<String> allergies;
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public Double getGoalProtein() { return goalProtein; }
-    public void setGoalProtein(Double goalProtein) { this.goalProtein = goalProtein; }
-    public String getPreference() { return preference; }
-    public void setPreference(String preference) { this.preference = preference; }
-    public List<String> getAllergies() { return allergies; }
-    public void setAllergies(List<String> allergies) { this.allergies = allergies; }
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Intake> intakes;
 }
