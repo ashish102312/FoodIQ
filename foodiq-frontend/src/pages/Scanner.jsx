@@ -3,6 +3,9 @@ import axios from 'axios';
 import { Camera, Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
 const Scanner = () => {
   const [image, setImage] = useState(null);
   const [results, setResults] = useState(null);
@@ -25,6 +28,7 @@ const Scanner = () => {
   const scanMenu = async () => {
     if (!image) return;
     setLoading(true);
+    setResults(null); // Clear previous results to show skeleton
     try {
       const res = await axios.post('http://localhost:8080/api/scan', { base64Image: image.split(',')[1] });
       setResults(res.data.detectedFoods);
@@ -71,28 +75,40 @@ const Scanner = () => {
               disabled={loading}
               className="mt-8 px-8 py-3 bg-primary text-white rounded-full font-bold text-lg shadow-md hover:bg-secondary hover:scale-105 transition-transform disabled:opacity-50"
             >
-              {loading ? 'Scanning...' : 'Analyze Menu'}
+              {loading ? 'Analyzing...' : 'Analyze Menu'}
             </button>
           )}
         </div>
 
-        {results && (
+        {(loading || results) && (
           <div className="mt-8 bg-white rounded-3xl shadow-xl p-8">
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2"><CheckCircle className="text-primary" /> Detected Food Items</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+              {loading ? <Skeleton width={200} /> : <><CheckCircle className="text-primary" /> Detected Food Items</>}
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {results.map((food, i) => (
-                <div key={i} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
-                  <div className="font-bold text-lg text-gray-800">{food}</div>
-                  <div className="text-sm text-gray-500 mt-2">Protein: ~20g | Calories: ~350</div>
-                  {isLoggedIn && (
-                      <button className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200">
-                          Save Intake
-                      </button>
-                  )}
-                </div>
-              ))}
+              {loading ? (
+                [1, 2, 3, 4].map((i) => (
+                  <div key={i} className="p-4 border border-gray-200 rounded-xl">
+                    <Skeleton height={24} width="60%" />
+                    <Skeleton height={16} width="40%" className="mt-2" />
+                    <Skeleton height={40} className="mt-4 rounded-lg" />
+                  </div>
+                ))
+              ) : (
+                results?.map((food, i) => (
+                  <div key={i} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
+                    <div className="font-bold text-lg text-gray-800">{food}</div>
+                    <div className="text-sm text-gray-500 mt-2">Protein: ~20g | Calories: ~350</div>
+                    {isLoggedIn && (
+                        <button className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200">
+                            Save Intake
+                        </button>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
-            {!isLoggedIn && (
+            {!loading && !isLoggedIn && (
                 <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg flex items-start gap-3">
                     <AlertCircle className="text-yellow-500 shrink-0" />
                     <div>

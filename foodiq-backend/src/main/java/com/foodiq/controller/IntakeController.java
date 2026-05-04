@@ -4,7 +4,6 @@ import com.foodiq.dto.IntakeDTO;
 import com.foodiq.model.Intake;
 import com.foodiq.service.IntakeService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +15,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/intake")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IntakeController {
 
     private final IntakeService intakeService;
+
+    public IntakeController(IntakeService intakeService) {
+        this.intakeService = intakeService;
+    }
 
     @PostMapping
     public ResponseEntity<Intake> addIntake(@Valid @RequestBody IntakeDTO intakeDTO) {
