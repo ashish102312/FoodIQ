@@ -26,6 +26,7 @@ public class Food {
 
     private Double protein;
     private Double carbs;
+    private Double fat;
     private Double calories;
 
     @Enumerated(EnumType.STRING)

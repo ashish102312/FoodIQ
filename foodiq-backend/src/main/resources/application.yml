@@ -25,6 +25,11 @@ spring:
   cache:
     type: redis
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
 
@@ -45,3 +50,15 @@ management:
   endpoint:
     health:
       show-details: always
+
+google:
+  vision:
+    api-key: ${VISION_API_KEY:AIzaSyD26AenRfJ3EfNgzUpkmfXqK_wEalNyDmw}
+
+ocr-space:
+  api-key: helloworld
+  url: https://api.ocr.space/parse/image
+
+edamam:
+  app-id: ba7036ea
+  app-key: c1cb31942efc18500b32812638273ea2

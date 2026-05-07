@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/test").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/api/scan").permitAll()
+                .requestMatchers("/api/scan/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)

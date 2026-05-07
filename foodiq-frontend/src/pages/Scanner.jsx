@@ -26,11 +26,18 @@ const Scanner = () => {
   };
 
   const scanMenu = async () => {
-    if (!image) return;
+    if (!fileInputRef.current?.files[0]) return;
     setLoading(true);
-    setResults(null); // Clear previous results to show skeleton
+    setResults(null); 
     try {
-      const res = await axios.post('http://localhost:8080/api/scan', { base64Image: image.split(',')[1] });
+      const formData = new FormData();
+      formData.append('file', fileInputRef.current.files[0]);
+      
+      const res = await axios.post('http://localhost:8080/api/scan', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       setResults(res.data.detectedFoods);
     } catch (err) {
       console.error(err);
@@ -97,8 +104,10 @@ const Scanner = () => {
               ) : (
                 results?.map((food, i) => (
                   <div key={i} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
-                    <div className="font-bold text-lg text-gray-800">{food}</div>
-                    <div className="text-sm text-gray-500 mt-2">Protein: ~20g | Calories: ~350</div>
+                    <div className="font-bold text-lg text-gray-800">{food.dish}</div>
+                    <div className="text-sm text-gray-500 mt-2">
+                      Protein: ~{food.protein}g | Calories: ~{food.calories} | Carbs: ~{food.carbs}g
+                    </div>
                     {isLoggedIn && (
                         <button className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200">
                             Save Intake

@@ -1,7 +1,15 @@
 package com.foodiq.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ScanResponse {
-    private List<String> detectedFoods;
-    public ScanResponse(List<String> detectedFoods) { this.detectedFoods = detectedFoods; }
-    public List<String> getDetectedFoods() { return detectedFoods; }
+    private String rawText;
+    private List<DishNutritionDTO> detectedFoods;
 }
