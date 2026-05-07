@@ -88,19 +88,29 @@ public class NutritionService {
     private List<String> extractCandidates(String ocrText) {
         // Clean: remove prices, symbols, numbers
         String cleaned = ocrText
-                .replaceAll("\\$\\d+\\.?\\d*", "")   // prices
-                .replaceAll("\\d+", "")               // standalone numbers
-                .replaceAll("[^a-zA-Z\\n\\s]", " ")   // special chars
-                .replaceAll("\\s{2,}", "\n");          // collapse spaces
+                .replaceAll("(?i)(rs\\.?|INR|₹|\\$|price)\\s*\\d*\\.?\\d+", "") // prices with symbols
+                .replaceAll("\\d+\\.?\\d*", "")                                 // standalone numbers
+                .replaceAll("[^a-zA-Z\\n\\s]", " ")                             // non-alpha
+                .replaceAll("\\s{2,}", " ");                                    // collapse spaces
 
         Set<String> candidates = new LinkedHashSet<>();
 
-        // Add full lines as candidates (for multi-word dish names)
-        Arrays.stream(cleaned.split("\\n"))
-                .map(String::trim)
-                .filter(line -> line.length() >= 4 && line.length() <= 50)
-                .filter(line -> !isStopWord(line))
-                .forEach(candidates::add);
+        // Add full lines and merged lines as candidates
+        String[] lines = cleaned.split("\\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.length() >= 4 && line.length() <= 50 && !isStopWord(line)) {
+                candidates.add(line);
+                
+                // Try merging with next line if it's short (likely a continuation)
+                if (i + 1 < lines.length) {
+                    String next = lines[i+1].trim();
+                    if (next.length() > 2 && next.length() < 20 && !isStopWord(next)) {
+                        candidates.add(line + " " + next);
+                    }
+                }
+            }
+        }
 
         // Add individual words as additional candidates
         Arrays.stream(cleaned.split("[\\s\\n]+"))

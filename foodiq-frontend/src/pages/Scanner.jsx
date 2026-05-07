@@ -16,7 +16,11 @@ const NutritionBar = ({ label, value, max, color }) => (
   </div>
 );
 
-const FoodCard = ({ food, index, isLoggedIn }) => {
+const FoodCard = ({ food, index, isLoggedIn, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(food.dish);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const score = food.healthScore || 0;
   const label = food.healthLabel || 'Moderate';
   const suggestion = food.suggestion;
@@ -29,14 +33,48 @@ const FoodCard = ({ food, index, isLoggedIn }) => {
   
   const { color, bg } = labelColors[label] || labelColors['Moderate'];
 
+  const handleUpdate = async () => {
+    if (editedName === food.dish) { setIsEditing(false); return; }
+    setIsUpdating(true);
+    try {
+      // Small delay to simulate AI lookup if needed, or real API call
+      // For now, let's just pass it back to parent to handle re-fetch or state update
+      await onUpdate(index, editedName);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Update failed', err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div
-      className="relative bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-5 hover:border-emerald-400/40 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
+      className={`relative bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-5 transition-all duration-300 hover:shadow-lg ${isUpdating ? 'opacity-50 pointer-events-none' : 'hover:border-emerald-400/40'}`}
       style={{ animationDelay: `${index * 60}ms` }}
     >
-      <div className="flex items-start justify-between mb-3">
-        <h4 className="font-semibold text-white text-sm leading-tight pr-2">{food.dish}</h4>
-        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${bg} ${color}`}>{label}</span>
+      <div className="flex items-start justify-between mb-3 gap-2">
+        {isEditing ? (
+          <div className="flex-1 flex gap-2">
+            <input 
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500"
+              autoFocus
+            />
+            <button onClick={handleUpdate} className="p-1 text-emerald-400 hover:bg-emerald-400/10 rounded">
+              <CheckCircle size={16} />
+            </button>
+          </div>
+        ) : (
+          <h4 
+            className="font-semibold text-white text-sm leading-tight cursor-pointer hover:text-emerald-400 transition-colors"
+            onClick={() => setIsEditing(true)}
+          >
+            {food.dish}
+          </h4>
+        )}
+        {!isEditing && <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${bg} ${color}`}>{label}</span>}
       </div>
 
       <div className="flex items-center gap-2 mb-3">
@@ -76,6 +114,43 @@ const Scanner = () => {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('token');
+
+  // New: Extract phrases for chips
+  const phrases = rawText
+    ? rawText.split(/[\n,;]+/)
+        .map(p => p.trim().replace(/[^a-zA-Z ]/g, ''))
+        .filter(p => p.length > 3)
+        .slice(0, 10)
+    : [];
+
+  const handleUpdate = async (index, newName) => {
+    try {
+      const res = await axios.get(`http://localhost:8080/api/food/search?keyword=${newName}`);
+      const matchedFood = res.data?.[0];
+      
+      if (matchedFood) {
+        const updatedFoods = [...results];
+        updatedFoods[index] = {
+          dish: matchedFood.name,
+          calories: matchedFood.calories,
+          protein: matchedFood.protein,
+          carbs: matchedFood.carbs,
+          fat: matchedFood.fat,
+          healthScore: Math.round(100 - (matchedFood.calories/10) + (matchedFood.protein*2)), // Local fallback calculation
+          healthLabel: matchedFood.calories > 400 ? 'Indulgent' : 'Healthy',
+          suggestion: 'Refined search result.'
+        };
+        setResults(updatedFoods);
+      } else {
+        // Just update the name if no DB match
+        const updatedFoods = [...results];
+        updatedFoods[index] = { ...updatedFoods[index], dish: newName };
+        setResults(updatedFoods);
+      }
+    } catch (err) {
+      console.error('Failed to fetch nutrition for edited name', err);
+    }
+  };
 
   const processFile = (f) => {
     if (!f || !f.type.startsWith('image/')) {
@@ -293,6 +368,20 @@ const Scanner = () => {
         {/* Results */}
         {!loading && results.length > 0 && (
           <div>
+            {/* Detected Chips */}
+            {phrases.length > 0 && (
+              <div className="mb-8">
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3">Detected Phrases</p>
+                <div className="flex flex-wrap gap-2">
+                  {phrases.map((p, i) => (
+                    <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-400 hover:text-emerald-400 hover:border-emerald-400/30 transition-all cursor-default">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <CheckCircle size={18} className="text-emerald-400" />
@@ -308,7 +397,7 @@ const Scanner = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {results.map((food, i) => (
-                <FoodCard key={i} food={food} index={i} isLoggedIn={isLoggedIn} />
+                <FoodCard key={i} food={food} index={i} isLoggedIn={isLoggedIn} onUpdate={handleUpdate} />
               ))}
             </div>
 
