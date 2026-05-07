@@ -1,54 +1,49 @@
 package com.foodiq.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
-        return buildError(HttpStatus.NOT_FOUND, ex.getMessage());
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleFileTooLarge(MaxUploadSizeExceededException ex) {
+        log.warn("File too large: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(errorBody(
+                "File too large. Maximum allowed size is 15MB.", "FILE_TOO_LARGE"
+        ));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String field = ((FieldError) error).getField();
-            fieldErrors.put(field, error.getDefaultMessage());
-        });
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("errors", fieldErrors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        log.warn("Bad request: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(errorBody(ex.getMessage(), "BAD_REQUEST"));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
+        log.error("Unhandled exception: ", ex);
+        return ResponseEntity.internalServerError().body(errorBody(
+                "An internal error occurred. Please try again.", "INTERNAL_ERROR"
+        ));
     }
 
-    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        return ResponseEntity.status(status).body(body);
+    private Map<String, Object> errorBody(String message, String code) {
+        return Map.of(
+                "success", false,
+                "error", message,
+                "code", code,
+                "timestamp", LocalDateTime.now().toString(),
+                "foods", java.util.List.of(),
+                "rawText", ""
+        );
     }
 }

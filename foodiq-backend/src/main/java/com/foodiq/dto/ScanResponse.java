@@ -11,5 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ScanResponse {
     private String rawText;
-    private List<DishNutritionDTO> detectedFoods;
+    private List<DishNutritionDTO> foods;
 }

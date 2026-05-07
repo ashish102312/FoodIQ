@@ -15,4 +15,10 @@ public class DishNutritionDTO {
     private double protein;
     private double carbs;
     private double fat;
+    
+    // AI Features
+    private int healthScore;
+    private String healthLabel; // e.g., "Healthy", "Indulgent"
+    private String suggestion;  // e.g., "Try grilled instead of fried"
+    private double confidence;  // OCR confidence or matching confidence
 }

@@ -1,131 +1,336 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { Camera, Upload, AlertCircle, CheckCircle } from 'lucide-react';
+import { Camera, Upload, AlertCircle, CheckCircle, Zap, Flame, Activity, X, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
+const NutritionBar = ({ label, value, max, color }) => (
+  <div className="flex items-center gap-2 mt-1">
+    <span className="text-xs text-gray-400 w-16 shrink-0">{label}</span>
+    <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all duration-700 ${color}`}
+        style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
+      />
+    </div>
+    <span className="text-xs text-gray-300 w-10 text-right">{Math.round(value)}g</span>
+  </div>
+);
+
+const FoodCard = ({ food, index, isLoggedIn }) => {
+  const score = food.healthScore || 0;
+  const label = food.healthLabel || 'Moderate';
+  const suggestion = food.suggestion;
+  
+  const labelColors = {
+    'Healthy': { color: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
+    'Moderate': { color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20' },
+    'Indulgent': { color: 'text-rose-400', bg: 'bg-rose-400/10 border-rose-400/20' }
+  };
+  
+  const { color, bg } = labelColors[label] || labelColors['Moderate'];
+
+  return (
+    <div
+      className="relative bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-5 hover:border-emerald-400/40 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10"
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <h4 className="font-semibold text-white text-sm leading-tight pr-2">{food.dish}</h4>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${bg} ${color}`}>{label}</span>
+      </div>
+
+      <div className="flex items-center gap-2 mb-3">
+        <Flame size={14} className="text-orange-400" />
+        <span className="text-2xl font-bold text-white">{Math.round(food.calories)}</span>
+        <span className="text-xs text-gray-400">kcal</span>
+        <span className={`ml-auto text-sm font-bold ${color}`}>{score}/100</span>
+      </div>
+
+      <NutritionBar label="Protein" value={food.protein} max={50} color="bg-blue-400" />
+      <NutritionBar label="Carbs" value={food.carbs} max={100} color="bg-amber-400" />
+      <NutritionBar label="Fat" value={food.fat} max={50} color="bg-rose-400" />
+
+      {suggestion && (
+        <p className="mt-3 text-[10px] text-gray-500 italic leading-tight">
+          "{suggestion}"
+        </p>
+      )}
+
+      {isLoggedIn && (
+        <button className="mt-4 w-full py-2 text-sm font-semibold rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+          + Log Intake
+        </button>
+      )}
+    </div>
+  );
+};
 
 const Scanner = () => {
   const [image, setImage] = useState(null);
-  const [results, setResults] = useState(null);
+  const [file, setFile] = useState(null);
+  const [results, setResults] = useState([]);
+  const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [scanTime, setScanTime] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
-
   const isLoggedIn = !!localStorage.getItem('token');
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+  const processFile = (f) => {
+    if (!f || !f.type.startsWith('image/')) {
+      setError('Please upload an image file.');
+      return;
     }
+    if (f.size > 15 * 1024 * 1024) {
+      setError('File must be under 15MB.');
+      return;
+    }
+    setFile(f);
+    setError(null);
+    setResults([]);
+    setRawText('');
+    setScanTime(null);
+    const reader = new FileReader();
+    reader.onloadend = () => setImage(reader.result);
+    reader.readAsDataURL(f);
+  };
+
+  const handleFileChange = (e) => processFile(e.target.files?.[0]);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    setDragOver(false);
+    processFile(e.dataTransfer.files?.[0]);
+  }, []);
+
+  const handleDragOver = (e) => { e.preventDefault(); setDragOver(true); };
+  const handleDragLeave = () => setDragOver(false);
+
+  const clearImage = () => {
+    setImage(null); setFile(null); setResults([]); setRawText('');
+    setError(null); setScanTime(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const scanMenu = async () => {
-    if (!fileInputRef.current?.files[0]) return;
+    if (!file) return;
     setLoading(true);
-    setResults(null); 
+    setResults([]);
+    setError(null);
+    setRawText('');
+    setScanTime(null);
+
     try {
       const formData = new FormData();
-      formData.append('file', fileInputRef.current.files[0]);
-      
+      formData.append('file', file);
+
       const res = await axios.post('http://localhost:8080/api/scan', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000,
       });
-      setResults(res.data.detectedFoods);
+
+      console.log('[FoodIQ] Backend response:', res.data);
+
+      if (res.data?.success) {
+        setResults(Array.isArray(res.data.foods) ? res.data.foods : []);
+        setRawText(res.data.rawText || '');
+        setScanTime(res.data.scanTime);
+      } else {
+        setError(res.data?.error || 'Scan returned no results.');
+      }
     } catch (err) {
-      console.error(err);
-      alert('Failed to scan image');
+      console.error('[FoodIQ] Scan error:', err);
+      if (err.code === 'ECONNABORTED') {
+        setError('Scan timed out. Please try a clearer image.');
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Could not connect to scanner. Is the backend running?');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
-      <div className="max-w-3xl w-full">
-        <div className="flex justify-between items-center mb-8">
-            <Link to="/" className="text-2xl font-bold text-primary">FoodIQ</Link>
-            {isLoggedIn ? (
-                <Link to="/dashboard" className="text-primary font-semibold hover:underline">Go to Dashboard</Link>
-            ) : (
-                <Link to="/login" className="text-primary font-semibold hover:underline">Login to Save</Link>
-            )}
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Ambient background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-violet-500/8 rounded-full blur-3xl" />
+      </div>
+
+      {/* Nav */}
+      <nav className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <Link to="/" className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+          FoodIQ
+        </Link>
+        <div className="flex items-center gap-4">
+          {isLoggedIn ? (
+            <Link to="/dashboard" className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+              Dashboard <ChevronRight size={14} />
+            </Link>
+          ) : (
+            <Link to="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+              Login to save results
+            </Link>
+          )}
         </div>
-        
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden p-8 flex flex-col items-center">
-          <h2 className="text-3xl font-extrabold mb-6 text-gray-800">Scan Your Menu</h2>
-          
-          <div 
-            className="w-full max-w-lg h-64 border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-emerald-50 transition-colors"
-            onClick={() => fileInputRef.current?.click()}
+      </nav>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-10">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium mb-4">
+            <Zap size={12} /> Local AI-Powered Scanner
+          </div>
+          <h1 className="text-4xl font-extrabold mb-3 bg-gradient-to-r from-white via-white to-gray-400 bg-clip-text text-transparent">
+            Scan Your Menu
+          </h1>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            Upload a menu photo. Our local OCR engine extracts food items and fetches nutritional data instantly.
+          </p>
+        </div>
+
+        {/* Upload Zone */}
+        <div className="bg-white/3 border border-white/10 rounded-3xl p-6 backdrop-blur mb-6">
+          <div
+            className={`relative w-full rounded-2xl border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden
+              ${dragOver ? 'border-emerald-400 bg-emerald-400/5' : 'border-white/20 hover:border-emerald-400/60 hover:bg-white/3'}
+              ${image ? 'h-64' : 'h-52'}`}
+            onClick={() => !image && fileInputRef.current?.click()}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
           >
             {image ? (
-              <img src={image} alt="preview" className="w-full h-full object-cover rounded-xl" />
-            ) : (
               <>
-                <Camera size={48} className="text-gray-400 mb-4" />
-                <p className="text-gray-500 font-medium">Click to upload menu image</p>
+                <img src={image} alt="Preview" className="w-full h-full object-contain" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); clearImage(); }}
+                  className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full transition-colors"
+                >
+                  <X size={14} />
+                </button>
               </>
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-8 px-4 text-center pointer-events-none">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Upload size={24} className="text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-white font-medium text-sm">Drop your menu image here</p>
+                  <p className="text-gray-500 text-xs mt-1">or click to browse · JPG, PNG, WEBP · max 15MB</p>
+                </div>
+              </div>
             )}
           </div>
-          <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
 
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+
+          {/* Error */}
+          {error && (
+            <div className="mt-4 flex items-start gap-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+              <AlertCircle size={16} className="text-rose-400 shrink-0 mt-0.5" />
+              <p className="text-rose-300 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Scan Button */}
           {image && (
-            <button 
-              onClick={scanMenu} 
+            <button
+              onClick={scanMenu}
               disabled={loading}
-              className="mt-8 px-8 py-3 bg-primary text-white rounded-full font-bold text-lg shadow-md hover:bg-secondary hover:scale-105 transition-transform disabled:opacity-50"
+              className="mt-5 w-full py-3.5 rounded-xl font-bold text-sm
+                bg-gradient-to-r from-emerald-500 to-cyan-500
+                hover:from-emerald-400 hover:to-cyan-400
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition-all duration-300 shadow-lg shadow-emerald-500/20
+                flex items-center justify-center gap-2"
             >
-              {loading ? 'Analyzing...' : 'Analyze Menu'}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  Analyzing with OCR…
+                </>
+              ) : (
+                <>
+                  <Zap size={16} />
+                  Analyze Menu
+                </>
+              )}
             </button>
           )}
         </div>
 
-        {(loading || results) && (
-          <div className="mt-8 bg-white rounded-3xl shadow-xl p-8">
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
-              {loading ? <Skeleton width={200} /> : <><CheckCircle className="text-primary" /> Detected Food Items</>}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {loading ? (
-                [1, 2, 3, 4].map((i) => (
-                  <div key={i} className="p-4 border border-gray-200 rounded-xl">
-                    <Skeleton height={24} width="60%" />
-                    <Skeleton height={16} width="40%" className="mt-2" />
-                    <Skeleton height={40} className="mt-4 rounded-lg" />
+        {/* Skeleton Loading */}
+        {loading && (
+          <div>
+            <div className="h-5 w-40 bg-white/10 rounded-full mb-5 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 animate-pulse">
+                  <div className="h-4 bg-white/10 rounded-full w-3/4 mb-3" />
+                  <div className="h-8 bg-white/10 rounded-full w-1/2 mb-3" />
+                  <div className="space-y-2">
+                    <div className="h-2 bg-white/10 rounded-full" />
+                    <div className="h-2 bg-white/10 rounded-full w-4/5" />
+                    <div className="h-2 bg-white/10 rounded-full w-3/5" />
                   </div>
-                ))
-              ) : (
-                results?.map((food, i) => (
-                  <div key={i} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
-                    <div className="font-bold text-lg text-gray-800">{food.dish}</div>
-                    <div className="text-sm text-gray-500 mt-2">
-                      Protein: ~{food.protein}g | Calories: ~{food.calories} | Carbs: ~{food.carbs}g
-                    </div>
-                    {isLoggedIn && (
-                        <button className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200">
-                            Save Intake
-                        </button>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-            {!loading && !isLoggedIn && (
-                <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg flex items-start gap-3">
-                    <AlertCircle className="text-yellow-500 shrink-0" />
-                    <div>
-                        <p className="text-sm text-yellow-700 font-medium">You are in Guest Mode</p>
-                        <p className="text-xs text-yellow-600 mt-1"><Link to="/login" className="underline">Login</Link> to get accurate nutritional values, allergy warnings, and track your intake.</p>
-                    </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && results.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <CheckCircle size={18} className="text-emerald-400" />
+                <h2 className="text-lg font-bold text-white">
+                  {results.length} Food{results.length > 1 ? 's' : ''} Detected
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Activity size={12} />
+                {scanTime ? `${scanTime}ms` : ''}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {results.map((food, i) => (
+                <FoodCard key={i} food={food} index={i} isLoggedIn={isLoggedIn} />
+              ))}
+            </div>
+
+            {!isLoggedIn && (
+              <div className="mt-6 p-4 bg-amber-500/8 border border-amber-500/20 rounded-2xl flex items-start gap-3">
+                <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-amber-300 text-sm font-medium">Guest Mode</p>
+                  <p className="text-amber-400/70 text-xs mt-0.5">
+                    <Link to="/login" className="underline">Login</Link> to save your scan history and track daily nutrition.
+                  </p>
+                </div>
+              </div>
             )}
+          </div>
+        )}
+
+        {/* No results */}
+        {!loading && image && results.length === 0 && !error && (
+          <div className="text-center py-10 text-gray-500">
+            <Camera size={32} className="mx-auto mb-3 opacity-40" />
+            <p className="text-sm">No food items detected. Try a clearer or better-lit menu photo.</p>
           </div>
         )}
       </div>

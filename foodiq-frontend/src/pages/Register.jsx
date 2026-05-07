@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -16,7 +16,7 @@ const Register = () => {
       await axios.post('http://localhost:8080/api/auth/register', payload);
       alert('Registration successful! Please login.');
       navigate('/login');
-    } catch (err) {
+    } catch {
       alert('Registration failed');
     }
   };

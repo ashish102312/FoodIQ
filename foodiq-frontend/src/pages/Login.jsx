@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -14,7 +14,7 @@ const Login = () => {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userName', res.data.name);
       navigate('/dashboard');
-    } catch (err) {
+    } catch {
       alert('Login failed');
     }
   };
