@@ -109,6 +109,7 @@ const Scanner = () => {
   const [results, setResults] = useState([]);
   const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState(null);
   const [scanTime, setScanTime] = useState(null);
   const [dragOver, setDragOver] = useState(false);
@@ -191,6 +192,7 @@ const Scanner = () => {
   const scanMenu = async () => {
     if (!file) return;
     setLoading(true);
+    setLoadingStep('Initializing AI Engine...');
     setResults([]);
     setError(null);
     setRawText('');
@@ -199,6 +201,10 @@ const Scanner = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
+
+      setTimeout(() => setLoadingStep('Optimizing Image Quality...'), 1000);
+      setTimeout(() => setLoadingStep('Extracting Menu Text...'), 2500);
+      setTimeout(() => setLoadingStep('Matching Nutrition Data...'), 4500);
 
       const res = await axios.post('http://localhost:8080/api/scan', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -333,7 +339,7 @@ const Scanner = () => {
               {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Analyzing with OCR…
+                  {loadingStep}
                 </>
               ) : (
                 <>
