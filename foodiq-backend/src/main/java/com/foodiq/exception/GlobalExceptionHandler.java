@@ -1,10 +1,12 @@
 package com.foodiq.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
@@ -26,6 +28,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Bad request: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(errorBody(ex.getMessage(), "BAD_REQUEST"));
+    }
+
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidInput(InvalidInputException ex) {
+        log.warn("Invalid input: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(errorBody(ex.getMessage(), "BAD_REQUEST"));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleUnreadableJson(HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(errorBody(
+                "Invalid request payload. Please check form values and try again.", "BAD_REQUEST"
+        ));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(errorBody(
+                "Invalid or duplicate data provided. Please review your input.", "BAD_REQUEST"
+        ));
     }
 
     @ExceptionHandler(Exception.class)
