@@ -1,52 +1,39 @@
 package com.foodiq.controller;
 
-import com.foodiq.dto.IntakeDTO;
 import com.foodiq.model.Intake;
+import com.foodiq.model.User;
 import com.foodiq.service.IntakeService;
-import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
+import com.foodiq.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/intake")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class IntakeController {
-
     private final IntakeService intakeService;
+    private final UserService userService;
 
-    public IntakeController(IntakeService intakeService) {
-        this.intakeService = intakeService;
-    }
-
-    @PostMapping
-    public ResponseEntity<Intake> addIntake(@Valid @RequestBody IntakeDTO intakeDTO) {
-        Intake savedIntake = intakeService.addIntake(intakeDTO);
-        return new ResponseEntity<>(savedIntake, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/daily")
-    public ResponseEntity<List<Intake>> getDailyIntakes(
-            @RequestParam Long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    @PostMapping("/add")
+    public ResponseEntity<?> addToIntake(@RequestParam Long foodId, @RequestParam(defaultValue = "1.0") Double quantity) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByEmail(email);
         
-        LocalDate queryDate = date != null ? date : LocalDate.now();
-        List<Intake> intakes = intakeService.getDailyIntakes(userId, queryDate);
-        return ResponseEntity.ok(intakes);
+        Intake intake = intakeService.addToIntake(user.getId(), foodId, quantity);
+        return ResponseEntity.ok(intake);
     }
 
-    @GetMapping("/score")
-    public ResponseEntity<Map<String, Object>> getProteinScore(
-            @RequestParam Long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    @GetMapping("/history")
+    public ResponseEntity<List<Intake>> getHistory() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.getUserByEmail(email);
         
-        LocalDate queryDate = date != null ? date : LocalDate.now();
-        Map<String, Object> scoreData = intakeService.calculateProteinScore(userId, queryDate);
-        return ResponseEntity.ok(scoreData);
+        List<Intake> history = intakeService.getUserHistory(user.getId());
+        return ResponseEntity.ok(history);
     }
 }

@@ -2,7 +2,6 @@ package com.foodiq.controller;
 
 import com.foodiq.dto.FoodDTO;
 import com.foodiq.model.Food;
-import com.foodiq.model.FoodType;
 import com.foodiq.service.FoodService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,8 @@ public class FoodController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Food>> getAllFoods(@RequestParam(required = false) FoodType type) {
-        List<Food> foods = foodService.getAllFoods(type);
+    public ResponseEntity<List<Food>> getAllFoods() {
+        List<Food> foods = foodService.getAllFoods();
         return ResponseEntity.ok(foods);
     }
 

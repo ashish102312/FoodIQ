@@ -1,27 +1,24 @@
 package com.foodiq.dto;
 
-import com.foodiq.model.FoodType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class FoodDTO {
-
-    @NotBlank(message = "Food name is required")
+    private Long id;
     private String name;
-
-    @NotNull(message = "Protein value is required")
+    private Integer calories;
     private Double protein;
-
     private Double carbs;
-
-    private Double calories;
-
-    @NotNull(message = "Food type is required")
-    private FoodType type;
-
-    private List<String> ingredients;
+    private Double fats;
+    private Double fiber;
+    private Double sodium;
+    private String micronutrients;
+    private Integer healthScore;
+    private String category;
 }

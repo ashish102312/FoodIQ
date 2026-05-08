@@ -42,10 +42,6 @@ jwt:
 tesseract:
   datapath: /opt/homebrew/opt/tesseract/share/tessdata
 
-openfoodfacts:
-  base-url: https://world.openfoodfacts.org
-  timeout-seconds: 5
-
 logging:
   level:
     org.hibernate.SQL: WARN

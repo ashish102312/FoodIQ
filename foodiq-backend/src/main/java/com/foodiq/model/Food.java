@@ -1,47 +1,35 @@
 package com.foodiq.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "foods")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Food {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Food name is required")
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_id")
+    @JsonIgnore
+    private Menu menu;
 
+    private String name;
+    private Integer calories;
     private Double protein;
     private Double carbs;
-    private Double fat;
-    private Double calories;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private FoodType type;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "food_ingredients", joinColumns = @JoinColumn(name = "food_id"))
-    @Column(name = "ingredient")
-    private List<String> ingredients;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Intake> intakes;
+    private Double fats;
+    private Double fiber;
+    private Double sugar;
+    private Double sodium;
+    private Double cholesterol;
+    private String micronutrients;
+    private Integer healthScore;
+    private String category;
 }

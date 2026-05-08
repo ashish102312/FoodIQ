@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>foodiq-frontend</title>
+    <script>
+      // Suppress known browser extension errors that clutter the console
+      window.addEventListener('error', function(e) {
+        if (e.message && (e.message.includes("parameter 1 is not of type 'Node'") || e.message.includes("ShortcutButton"))) {
+          e.stopImmediatePropagation();
+        }
+      }, true);
+      window.addEventListener('unhandledrejection', function(e) {
+        if (e.reason && e.reason.message && e.reason.message.includes("ShortcutButton")) {
+          e.preventDefault();
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 public class FoodiqApplication {
 	public static void main(String[] args) {
+		System.setProperty("jna.library.path", "/opt/homebrew/lib");
 		SpringApplication.run(FoodiqApplication.class, args);
 	}
 }

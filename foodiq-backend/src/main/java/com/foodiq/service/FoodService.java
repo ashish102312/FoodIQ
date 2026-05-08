@@ -3,7 +3,6 @@ package com.foodiq.service;
 import com.foodiq.dto.FoodDTO;
 import com.foodiq.exception.ResourceNotFoundException;
 import com.foodiq.model.Food;
-import com.foodiq.model.FoodType;
 import com.foodiq.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,11 +22,15 @@ public class FoodService {
     public Food saveFood(FoodDTO dto) {
         Food food = Food.builder()
                 .name(dto.getName())
+                .calories(dto.getCalories())
                 .protein(dto.getProtein())
                 .carbs(dto.getCarbs())
-                .calories(dto.getCalories())
-                .type(dto.getType())
-                .ingredients(dto.getIngredients())
+                .fats(dto.getFats())
+                .fiber(dto.getFiber())
+                .sodium(dto.getSodium())
+                .micronutrients(dto.getMicronutrients())
+                .healthScore(dto.getHealthScore())
+                .category(dto.getCategory())
                 .build();
         return foodRepository.save(food);
     }
@@ -51,13 +54,10 @@ public class FoodService {
     }
 
     /**
-     * Get all foods, optionally filtered by type (VEG / NON_VEG).
+     * Get all foods.
      */
-    @Cacheable(value = "allFoods", key = "#type != null ? #type.name() : 'ALL'")
-    public List<Food> getAllFoods(FoodType type) {
-        if (type != null) {
-            return foodRepository.findByType(type);
-        }
+    @Cacheable(value = "allFoods")
+    public List<Food> getAllFoods() {
         return foodRepository.findAll();
     }
 

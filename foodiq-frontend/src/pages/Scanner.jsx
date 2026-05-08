@@ -27,7 +27,7 @@ const Scanner = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file', fileInputRef.current.files[0]);
+      formData.append('image', fileInputRef.current.files[0]);
       
       const res = await axios.post('http://localhost:8080/api/scan', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -40,15 +40,28 @@ const Scanner = () => {
     setLoading(false);
   };
 
+  const addToIntake = async (foodId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`http://localhost:8080/api/intake/add?foodId=${foodId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Added to daily intake!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add to intake.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
       <div className="max-w-3xl w-full">
         <div className="flex justify-between items-center mb-8">
-            <Link to="/" className="text-2xl font-bold text-primary">FoodIQ</Link>
+            <Link to="/" className="text-2xl font-bold text-emerald-600">FoodIQ</Link>
             {isLoggedIn ? (
-                <Link to="/dashboard" className="text-primary font-semibold hover:underline">Go to Dashboard</Link>
+                <Link to="/dashboard" className="text-emerald-600 font-semibold hover:underline">Go to Dashboard</Link>
             ) : (
-                <Link to="/login" className="text-primary font-semibold hover:underline">Login to Save</Link>
+                <Link to="/login" className="text-emerald-600 font-semibold hover:underline">Login to Save</Link>
             )}
         </div>
         
@@ -56,7 +69,7 @@ const Scanner = () => {
           <h2 className="text-3xl font-extrabold mb-6 text-gray-800">Scan Your Menu</h2>
           
           <div 
-            className="w-full max-w-lg h-64 border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-emerald-50 transition-colors"
+            className="w-full max-w-lg h-64 border-4 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-colors"
             onClick={() => fileInputRef.current?.click()}
           >
             {image ? (
@@ -74,7 +87,7 @@ const Scanner = () => {
             <button 
               onClick={scanMenu} 
               disabled={loading}
-              className="mt-8 px-8 py-3 bg-primary text-white rounded-full font-bold text-lg shadow-md hover:bg-secondary hover:scale-105 transition-transform disabled:opacity-50"
+              className="mt-8 px-8 py-3 bg-emerald-600 text-white rounded-full font-bold text-lg shadow-md hover:bg-emerald-700 hover:scale-105 transition-transform disabled:opacity-50"
             >
               {loading ? 'Scanning...' : 'Analyze Menu'}
             </button>
@@ -83,16 +96,19 @@ const Scanner = () => {
 
         {results && (
           <div className="mt-8 bg-white rounded-3xl shadow-xl p-8">
-            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2"><CheckCircle className="text-primary" /> Detected Food Items</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2"><CheckCircle className="text-emerald-500" /> Detected Food Items</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {results.map((food, i) => (
                 <div key={i} className="p-4 border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
-                  <div className="font-bold text-lg text-gray-800">{food.dish}</div>
+                  <div className="font-bold text-lg text-gray-800">{food.name}</div>
                   <div className="text-sm text-gray-500 mt-2">
                     Protein: {Math.round(food.protein)}g | Calories: {Math.round(food.calories)} kcal
                   </div>
                   {isLoggedIn && (
-                      <button className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200">
+                      <button 
+                        onClick={() => addToIntake(food.id)}
+                        className="mt-4 w-full py-2 bg-emerald-100 text-emerald-800 font-semibold rounded-lg hover:bg-emerald-200"
+                      >
                           Save Intake
                       </button>
                   )}

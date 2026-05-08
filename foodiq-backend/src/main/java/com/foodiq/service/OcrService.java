@@ -1,57 +1,49 @@
 package com.foodiq.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 
-/**
- * Local OCR service using Tesseract 5 via Tess4J.
- * No external API calls — fully offline.
- * Uses ImageProcessingService to preprocess the image before OCR.
- */
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class OcrService {
+    private static final Logger logger = LoggerFactory.getLogger(OcrService.class);
 
-    @Value("${tesseract.datapath:/opt/homebrew/opt/tesseract/share/tessdata}")
+    @Value("${tesseract.datapath}")
     private String tessDataPath;
 
-    private final ImageProcessingService imageProcessingService;
+    public String extractText(BufferedImage image) {
+        Tesseract tesseract = new Tesseract();
+        
+        // Ensure the path is correct
+        File tessDataFolder = new File(tessDataPath);
+        if (!tessDataFolder.exists()) {
+            logger.error("Tesseract data path does not exist: {}", tessDataPath);
+            // Fallback or handle error
+        }
+        
+        tesseract.setDatapath(tessDataPath);
+        tesseract.setLanguage("eng");
+        tesseract.setPageSegMode(1); // Automatic page segmentation with OSD
 
-    public String extractText(byte[] imageBytes) {
-        log.info("Starting local OCR with Tess4J...");
         try {
-            // Preprocess image for best results
-            BufferedImage processed = imageProcessingService.preprocess(imageBytes);
-
-            // Configure Tesseract
-            Tesseract tesseract = new Tesseract();
-            tesseract.setDatapath(tessDataPath);
-            tesseract.setLanguage("eng");
-            // PSM 6: Assume a single uniform block of text (good for menus)
-            tesseract.setPageSegMode(6);
-            // OEM 1: Use LSTM neural net engine
-            tesseract.setOcrEngineMode(1);
-
-            String result = tesseract.doOCR(processed);
-
-            log.info("=== OCR EXTRACTED TEXT ===");
-            log.info("\n{}", result);
-            log.info("=== END OCR TEXT ===");
-
-            return result != null ? result.trim() : "";
-
+            logger.info("Extracting text from image using Tesseract...");
+            String result = tesseract.doOCR(image);
+            logger.info("OCR Result length: {}", result != null ? result.length() : 0);
+            return result;
+        } catch (UnsatisfiedLinkError e) {
+            logger.error("Tesseract native library not found. Please ensure 'tesseract' is installed (brew install tesseract). Details: {}", e.getMessage());
+            return "ERROR: Tesseract library not found";
         } catch (TesseractException e) {
-            log.error("Tesseract OCR failed: {}", e.getMessage());
+            logger.error("OCR failed: {}", e.getMessage());
             return "";
         } catch (Exception e) {
-            log.error("Unexpected OCR error: ", e);
+            logger.error("Unexpected error during OCR: ", e);
             return "";
         }
     }
