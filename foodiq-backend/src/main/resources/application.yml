@@ -57,7 +57,7 @@ jwt:
   expiration: 86400000
 
 tesseract:
-  datapath: ${TESSDATA_PREFIX:/usr/share/tesseract-ocr/4.00/tessdata}
+  datapath: ${TESSDATA_PREFIX:/opt/homebrew/share/tessdata}
 
 
 logging:
