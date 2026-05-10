@@ -6,6 +6,7 @@ import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend
 } from 'chart.js';
+import { API_BASE_URL } from '../config/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -18,15 +19,12 @@ const Dashboard = () => {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:8080/api/dashboard/stats', {
+        const res = await axios.get(`${API_BASE_URL}/api/dashboard/stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setData(res.data);
       } catch (err) {
-        console.error(err);
-        if(err.response?.status === 401) {
-            handleLogout();
-        }
+        console.error('Dashboard fetch error:', err);
       }
     };
     fetchDashboard();

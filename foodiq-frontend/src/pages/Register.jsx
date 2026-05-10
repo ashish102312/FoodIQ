@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', goalProtein: 150, preference: 'veg', allergies: '' });
@@ -11,13 +12,21 @@ const Register = () => {
     try {
       const payload = {
         ...formData,
+        goalProtein: Number(formData.goalProtein),
         allergies: formData.allergies ? formData.allergies.split(',').map(s => s.trim()).filter(Boolean) : []
       };
-      await axios.post('http://localhost:8080/api/auth/register', payload);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, payload);
       alert('Registration successful! Please login.');
       navigate('/login');
     } catch (err) {
-      alert('Registration failed');
+      console.error('Registration error:', err);
+      let errorMsg = 'Registration failed';
+      if (err.response && err.response.data && err.response.data.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.message) {
+        errorMsg = `Network/Axios Error: ${err.message}`;
+      }
+      alert(errorMsg);
     }
   };
 
@@ -39,7 +48,30 @@ const Register = () => {
             Register
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <a href={`${API_BASE_URL}/oauth2/authorization/google`} className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+              <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
+              Google
+            </a>
+            <a href={`${API_BASE_URL}/oauth2/authorization/github`} className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+              <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" />
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-sm text-gray-600">
           Already have an account? <Link to="/login" className="text-primary hover:text-secondary font-semibold">Sign in</Link>
         </p>
       </div>

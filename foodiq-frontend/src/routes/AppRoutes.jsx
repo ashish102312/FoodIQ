@@ -4,10 +4,28 @@ import Scanner from '../pages/Scanner';
 import Dashboard from '../pages/Dashboard';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import OAuth2RedirectHandler from '../pages/OAuth2RedirectHandler';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
+  let isValid = false;
+  if (token) {
+    try {
+      // Decode the JWT payload (the second part of the token)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Check if expiration time is greater than current time
+      if (payload.exp * 1000 > Date.now()) {
+        isValid = true;
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+      }
+    } catch (e) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+    }
+  }
+  return isValid ? children : <Navigate to="/login" />;
 };
 
 const AppRoutes = () => {
@@ -23,6 +41,7 @@ const AppRoutes = () => {
             <Dashboard />
           </PrivateRoute>
         } />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
       </Routes>
     </Router>
   );

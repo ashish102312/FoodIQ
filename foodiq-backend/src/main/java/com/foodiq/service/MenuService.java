@@ -34,15 +34,15 @@ public class MenuService {
 
         // Robust secondary matching for specific images provided by the user
         // Menu 1: Green Delight
-        if (upperText.contains("GREEN DELIGHT") || upperText.contains("VEGETARIAN RESTAURANT") || upperText.contains("DESSERTS")) {
+        if (upperText.contains("GREEN DELIGHT") || upperText.contains("VEGETARIAN") || upperText.contains("KALE") || upperText.contains("SALAD")) {
              return menuRepository.findByKeyword("GREEN DELIGHT");
         }
         // Menu 2: Fresh & Organic
-        if (upperText.contains("FRESH & ORGANIC") || upperText.contains("QUICK SNACKS") || upperText.contains("TORTILLA WRAPS") || upperText.contains("MEAL PLANNER")) {
+        if (upperText.contains("FRESH") || upperText.contains("ORGANIC") || upperText.contains("TORTILLA") || upperText.contains("WRAP") || upperText.contains("SNACK")) {
              return menuRepository.findByKeyword("Fresh & Organic");
         }
         // Menu 3: Brunch
-        if (upperText.contains("BRUNCH") || upperText.contains("SPECIAL MENU") || upperText.contains("GLUTEN FREE") || upperText.contains("VEGGAN")) {
+        if (upperText.contains("BRUNCH") || upperText.contains("EGG") || upperText.contains("PANCAKE") || upperText.contains("BREAKFAST")) {
              return menuRepository.findByKeyword("Brunch");
         }
 
