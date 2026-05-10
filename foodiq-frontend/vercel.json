@@ -1,4 +1,5 @@
 {
+  "name": "foodiq",
   "rewrites": [
     {
       "source": "/(.*)",

@@ -51,12 +51,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <div className="text-2xl font-bold text-primary flex items-center gap-2">
+      <nav className="bg-white shadow-sm px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="text-xl md:text-2xl font-bold text-primary flex items-center gap-2">
           <Activity size={28} /> FoodIQ
         </div>
-        <div className="flex items-center gap-4">
-          <span className="font-medium text-gray-700">Hi, {userName}</span>
+        <div className="flex items-center gap-2 md:gap-4">
+          <span className="hidden sm:inline font-medium text-gray-700">Hi, {userName}</span>
           <button onClick={() => navigate('/scanner')} className="p-2 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200" title="Scan Menu">
             <Camera size={20} />
           </button>

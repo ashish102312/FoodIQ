@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Scan, PieChart, Camera, X } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -30,24 +31,11 @@ const Landing = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f3f9f6]">
-      {/* Navbar */}
-      <nav className="px-10 py-6 flex justify-between items-center bg-transparent">
-        <div className="text-2xl font-extrabold text-primary tracking-wide">
-          FoodIQ
-        </div>
-        <div className="gap-8 flex items-center text-sm font-semibold text-gray-800">
-          <Link to="/" className="text-primary border-b-2 border-primary pb-1">Home</Link>
-          <Link to="#" className="hover:text-primary transition-colors">Product</Link>
-          <Link to="#" className="hover:text-primary transition-colors">Sports</Link>
-          <Link to="#" className="hover:text-primary transition-colors">Reports</Link>
-          <Link to="#" className="hover:text-primary transition-colors">Menu</Link>
-          <Link to="/login" className="hover:text-primary transition-colors ml-4">Login</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-10 py-12 flex flex-col items-center">
-        <div className="flex flex-col md:flex-row items-center justify-between w-full mb-20 bg-white rounded-xl shadow-sm p-12 relative overflow-hidden min-h-[550px]">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 md:px-10 py-6 md:py-12 flex flex-col items-center">
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full mb-12 md:mb-20 bg-white rounded-2xl md:rounded-xl shadow-sm p-8 md:p-12 relative overflow-hidden min-h-[500px] md:min-h-[550px]">
           {/* Background Video */}
           <video
             autoPlay
@@ -63,31 +51,31 @@ const Landing = () => {
           {/* Overlay for better readability */}
           <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-[1]"></div>
 
-          <div className="md:w-1/2 pr-10 z-10 relative">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
+          <div className="w-full lg:w-1/2 lg:pr-10 z-10 relative text-center lg:text-left">
+            <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
               Welcome to FoodIQ - Your Personalized Nutrition Intelligence.
             </h1>
-            <p className="text-lg text-gray-600 mb-10 max-w-md leading-relaxed">
+            <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
               Leverage AI-driven insights to make informed dietary choices and optimize your health.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register" className="inline-flex items-center justify-center gap-3 px-6 py-3.5  text-white font-semibold rounded-2xl shadow-lg hover:bg-secondary transition-all">
+            <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+              <Link to="/register" className="inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-primary text-white font-semibold rounded-2xl shadow-lg hover:bg-secondary transition-all">
                 <User size={20} className="fill-white" />
                 Get Started
               </Link>
-              <button onClick={handleScannerClick} className="inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-primary text-primary font-semibold rounded shadow-lg hover:bg-emerald-500 hover:text-white transition-all">
+              <button onClick={handleScannerClick} className="inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-white border-2 border-primary text-primary font-semibold rounded-2xl shadow-lg hover:bg-emerald-50 hover:shadow-xl transition-all">
                 <Camera size={20} />
                 Try Scanner (Guest)
               </button>
             </div>
           </div>
 
-          <div className="md:w-1/2 mt-10 md:mt-0 relative z-10 flex justify-end">
+          <div className="w-full lg:w-1/2 mt-12 lg:mt-0 relative z-10 flex justify-center lg:justify-end">
             <img
               src="/salad_bowl.png"
               alt="Healthy Salad Bowl"
-              className="w-[650px] h-[450px] object-cover rounded-xl shadow-xl"
+              className="w-full max-w-[550px] h-auto object-contain rounded-xl drop-shadow-2xl transform hover:scale-105 transition-transform duration-500"
             />
           </div>
 

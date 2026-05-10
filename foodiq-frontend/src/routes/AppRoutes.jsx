@@ -4,6 +4,10 @@ import Scanner from '../pages/Scanner';
 import Dashboard from '../pages/Dashboard';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import Product from '../pages/Product';
+import Sports from '../pages/Sports';
+import Reports from '../pages/Reports';
+import Menu from '../pages/Menu';
 import OAuth2RedirectHandler from '../pages/OAuth2RedirectHandler';
 
 const PrivateRoute = ({ children }) => {
@@ -33,6 +37,10 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/product" element={<Product />} />
+        <Route path="/sports" element={<Sports />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/menu" element={<Menu />} />
         <Route path="/scanner" element={<Scanner />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
