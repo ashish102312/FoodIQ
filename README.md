@@ -1,23 +1,23 @@
-# 🥗 FoodIQ - Personalized Nutrition Intelligence
+# FoodIQ - Personalized Nutrition Intelligence
 
-FoodIQ is an AI-driven, full-stack web application designed to help you make smarter, healthier dietary choices effortlessly. By combining a modern, aesthetically pleasing frontend with a robust Spring Boot backend, FoodIQ empowers users to scan restaurant menus, instantly extract food details, and track daily nutritional macros. 
-
----
-
-## ✨ Features
-
-- **📸 Smart Menu Scanner**: Snap a picture of any menu and instantly extract food items with their nutritional breakdown using AI (Google Cloud Vision API integration).
-- **📊 Macro & Intake Tracking**: Log your daily protein, carbs, and calories to ensure you stay on track with your fitness goals.
-- **🚨 Smart Allergy Alerts**: Automatically flags menu items that conflict with your personalized allergy profile (e.g., nuts, dairy).
-- **💡 Dietary Recommendations**: Get intelligent, real-time suggestions on what to eat based on your remaining daily macro goals and your preferred diet (Veg/Non-Veg).
-- **📈 Interactive Dashboard**: Visualize your weekly caloric intake and protein score with beautiful, interactive charts.
-- **🔐 Secure Authentication**: JWT-based stateless authentication system protecting user data.
+FoodIQ is an AI-driven, full-stack web application designed to help you make smarter, healthier dietary choices effortlessly. By combining a modern, aesthetically pleasing frontend with a robust Spring Boot backend, FoodIQ empowers users to scan restaurant menus, instantly extract food details, and track daily nutritional macros.
 
 ---
 
-## 🛠️ Tech Stack
+##  Features
 
-### Frontend
+- **Smart Menu Scanner**: Snap a picture of any menu and instantly extract food items with their nutritional breakdown using AI (Google Cloud Vision API integration).
+- **Macro & Intake Tracking**: Log your daily protein, carbs, and calories to ensure you stay on track with your fitness goals.
+- **Smart Allergy Alerts**: Automatically flags menu items that conflict with your personalized allergy profile (e.g., nuts, dairy).
+- **Dietary Recommendations**: Get intelligent, real-time suggestions on what to eat based on your remaining daily macro goals and your preferred diet (Veg/Non-Veg).
+- **Interactive Dashboard**: Visualize your weekly caloric intake and protein score with beautiful, interactive charts.
+- **Secure Authentication**: JWT-based stateless authentication system protecting user data.
+
+---
+
+## Tech Stack
+
+## Frontend
 - **React (Vite)**: Lightning-fast development and optimized build.
 - **Tailwind CSS v4**: For a beautiful, responsive, and modern UI.
 - **React Router**: Seamless Single Page Application (SPA) navigation.
@@ -32,7 +32,7 @@ FoodIQ is an AI-driven, full-stack web application designed to help you make sma
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js (v18+)

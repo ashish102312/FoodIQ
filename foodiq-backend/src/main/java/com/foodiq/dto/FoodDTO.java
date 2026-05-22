@@ -21,4 +21,5 @@ public class FoodDTO {
     private String micronutrients;
     private Integer healthScore;
     private String category;
+    private Double netWeight;
 }

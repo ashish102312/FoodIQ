@@ -98,6 +98,7 @@ public class ScanController {
                 .micronutrients(food.getMicronutrients())
                 .healthScore(food.getHealthScore())
                 .category(food.getCategory())
+                .netWeight(food.getNetWeight())
                 .build();
     }
 }

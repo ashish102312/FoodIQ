@@ -146,14 +146,24 @@ const Scanner = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {results.map((food, i) => (
-                <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col justify-between">
+                <div key={i} className="p-6 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col justify-between hover:shadow-md transition-shadow">
                   <div>
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-start gap-4">
                       <span className="px-3 py-1 bg-white rounded-full text-xs font-bold text-emerald-600 uppercase tracking-wider border border-emerald-50">{food.category || 'Food'}</span>
-                      <div className="text-sm font-bold text-gray-400">{Math.round(food.calories)} kcal</div>
+                      <div className="text-right flex flex-col items-end">
+                        <span className="px-2.5 py-1 bg-white rounded-lg text-xs font-bold text-gray-700 border border-gray-100 shadow-sm">
+                          Net Wt: <span className="text-emerald-600">{food.netWeight || 100}g</span>
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium mt-1">
+                          {Math.round(((food.protein || 0) / (food.netWeight || 100)) * 100)}g protein, {Math.round(((food.calories || 0) / (food.netWeight || 100)) * 100)}kcal per 100g
+                        </span>
+                      </div>
                     </div>
                     <h4 className="font-bold text-xl text-gray-900 mt-3">{food.name}</h4>
-                    <p className="text-sm text-gray-500 mt-1 font-medium">Protein: <span className="text-emerald-600 font-bold">{Math.round(food.protein)}g</span></p>
+                    <div className="flex gap-4 mt-2">
+                      <p className="text-xs text-gray-500 font-medium">Total Protein: <span className="text-emerald-600 font-bold">{Math.round(food.protein)}g</span></p>
+                      <p className="text-xs text-gray-500 font-medium">Total Calories: <span className="text-emerald-600 font-bold">{Math.round(food.calories)} kcal</span></p>
+                    </div>
                   </div>
 
                   {isLoggedIn && (

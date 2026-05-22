@@ -32,4 +32,7 @@ public class Food {
     private String micronutrients;
     private Integer healthScore;
     private String category;
+
+    @Column(name = "net_weight")
+    private Double netWeight;
 }

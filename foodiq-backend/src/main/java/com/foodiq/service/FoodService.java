@@ -31,6 +31,7 @@ public class FoodService {
                 .micronutrients(dto.getMicronutrients())
                 .healthScore(dto.getHealthScore())
                 .category(dto.getCategory())
+                .netWeight(dto.getNetWeight())
                 .build();
         return foodRepository.save(food);
     }
