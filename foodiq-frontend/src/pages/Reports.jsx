@@ -3,10 +3,10 @@ import { BarChart3, PieChart, TrendingUp, Download, Share2, Info, CheckCircle2, 
 import { Line, Pie } from 'react-chartjs-2';
 import Navbar from '../components/Navbar';
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement
+  Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, Filler
 } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, Filler);
 
 const Reports = () => {
   const lineData = {
