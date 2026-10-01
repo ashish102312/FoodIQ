@@ -1,0 +1,10 @@
+{
+  "name": "foodiq-root",
+  "version": "1.0.0",
+  "description": "Root package to run frontend easily",
+  "scripts": {
+    "dev": "cd foodiq-frontend && npm run dev",
+    "build": "cd foodiq-frontend && npm run build",
+    "install:frontend": "cd foodiq-frontend && npm install"
+  }
+}
