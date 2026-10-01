@@ -60,6 +60,21 @@ npm run dev
 
 ---
 
+## 🚀 Render Deployment (Backend)
+
+The Spring Boot backend is pre-configured for seamless deployment as a Render Web Service connected to Supabase PostgreSQL:
+
+1. **Build Command**: `./mvnw clean package -DskipTests`
+2. **Start Command**: `java -jar target/foodiq-0.0.1-SNAPSHOT.jar`
+3. **Root Directory**: `foodiq-backend`
+
+### Required Environment Variables on Render
+- `DATABASE_URL`: `jdbc:postgresql://<SUPABASE_HOST>:5432/postgres?sslmode=require`
+- `DATABASE_USERNAME`: `postgres`
+- `DATABASE_PASSWORD`: `<your-supabase-db-password>`
+- `JWT_SECRET`: `<secure-256bit-secret>`
+- `FRONTEND_URL`: `<deployed-react-frontend-url>`
+
 ## 📸 Screenshots & Flow
 1. **Landing Page**: Start your journey with a clean, engaging welcome screen.
 2. **Scanner (Guest/Logged-in)**: Upload menu images and view detected items.
