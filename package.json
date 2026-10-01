@@ -7,6 +7,7 @@
     "build": "cd foodiq-frontend && npm run build",
     "install:frontend": "cd foodiq-frontend && npm install",
     "build:backend": "cd foodiq-backend && ./mvnw clean package -DskipTests",
-    "dev:backend": "cd foodiq-backend && ./mvnw spring-boot:run"
+    "dev:backend": "cd foodiq-backend && ./mvnw spring-boot:run",
+    "verify:deployment": "bash scripts/verify-deployment.sh"
   }
 }
