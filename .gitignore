@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+target/
+
+# Environment variables & secrets
+.env
+*.env
+.env.*
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+backend.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
