@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: foodiq-backend
+    runtime: java
+    rootDir: foodiq-backend
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/foodiq-0.0.1-SNAPSHOT.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
