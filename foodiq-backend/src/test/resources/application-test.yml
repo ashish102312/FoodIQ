@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: foodiq-backend-test
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/foodiq}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:admin123}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+jwt:
+  secret: 9a4f2c8d3b7a1e6f45c8a0b3f267d8b1d4e6f3c8a9d2b5f8e3a9c8b5f6v8a3d
+  expiration: 86400000
