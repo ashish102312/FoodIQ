@@ -32,3 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 backend.log
+
+### Environment and Secrets ###
+.env
+*.env
+.env.*
+.DS_Store
